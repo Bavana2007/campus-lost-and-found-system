@@ -1,3 +1,5 @@
+package campuslostandfound;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -104,7 +106,7 @@ public class ClaimDAO {
      */
     public boolean approveClaim(int claimId, int itemId) {
         String claimSql = "UPDATE claims SET status = 'APPROVED' WHERE claim_id = ?";
-        String itemSql = "UPDATE items SET status = 'CLAIMED' WHERE item_id = ?";
+        String itemSql = "UPDATE items SET item_status = 'CLAIMED' WHERE item_id = ?";
         try (Connection con = DBConnection.getConnection()) {
             con.setAutoCommit(false);
             try (PreparedStatement ps1 = con.prepareStatement(claimSql);
