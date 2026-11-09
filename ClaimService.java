@@ -12,30 +12,30 @@ public class ClaimService {
     private final ClaimDAO claimDAO = new ClaimDAO();
 
     /** Student submits a claim. Returns a message to show in the UI. */
-    public String submitClaim(int itemId, int userId, String description) {
-        if (description == null || description.trim().isEmpty()) {
+    public String submitClaim(int itemId, int claimantId, String message) {
+        if (message == null || message.trim().isEmpty()) {
             return "Please describe why this item is yours.";
         }
-        if (description.trim().length() < 10) {
-            return "Description is too short. Add identifying details.";
+        if (message.trim().length() < 10) {
+            return "Message is too short. Add identifying details.";
         }
-        if (claimDAO.hasPendingClaim(itemId, userId)) {
+        if (claimDAO.hasPendingClaim(itemId, claimantId)) {
             return "You already have a pending claim on this item.";
         }
-        Claim claim = new Claim(itemId, userId, description.trim());
+        Claim claim = new Claim(itemId, claimantId, message.trim());
         return claimDAO.addClaim(claim)
-                ? "Claim submitted successfully. Status: PENDING."
+                ? "Claim submitted successfully. Status: pending."
                 : "Could not submit claim. Please try again.";
     }
 
     /** Student views their own claims and statuses. */
-    public List<Claim> viewMyClaims(int userId) {
-        return claimDAO.getClaimsByUser(userId);
+    public List<Claim> viewMyClaims(int claimantId) {
+        return claimDAO.getClaimsByClaimant(claimantId);
     }
 
     /** Admin: list claims waiting for a decision. */
     public List<Claim> getPendingClaims() {
-        return claimDAO.getClaimsByStatus("PENDING");
+        return claimDAO.getClaimsByStatus("pending");
     }
 
     /** Admin: list every claim. */
@@ -43,15 +43,15 @@ public class ClaimService {
         return claimDAO.getAllClaims();
     }
 
-    /** Admin approves a claim. The item status is updated to CLAIMED. */
+    /** Admin approves a claim. The item status is updated to 'claimed'. */
     public String approveClaim(int claimId) {
         Claim claim = claimDAO.getClaimById(claimId);
         if (claim == null) return "Claim not found.";
-        if (!"PENDING".equals(claim.getStatus())) {
-            return "This claim has already been " + claim.getStatus().toLowerCase() + ".";
+        if (!"pending".equals(claim.getStatus())) {
+            return "This claim has already been " + claim.getStatus() + ".";
         }
         return claimDAO.approveClaim(claimId, claim.getItemId())
-                ? "Claim approved. Item marked as CLAIMED."
+                ? "Claim approved. Item marked as claimed."
                 : "Could not approve claim.";
     }
 
@@ -59,8 +59,8 @@ public class ClaimService {
     public String rejectClaim(int claimId) {
         Claim claim = claimDAO.getClaimById(claimId);
         if (claim == null) return "Claim not found.";
-        if (!"PENDING".equals(claim.getStatus())) {
-            return "This claim has already been " + claim.getStatus().toLowerCase() + ".";
+        if (!"pending".equals(claim.getStatus())) {
+            return "This claim has already been " + claim.getStatus() + ".";
         }
         return claimDAO.rejectClaim(claimId)
                 ? "Claim rejected."
